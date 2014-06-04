@@ -167,6 +167,12 @@ function displaySlots(from, to) {
                     html += '<input id="reserve" class="button" type="button" value="R" onClick="reserve(' + days[i][i2].id + ');"/>';
                 } else {
                     html += days[i][i2].name;
+                    if (!days[i][i2].offered) {
+                        html += '<input class="button" type="button" value="O" onClick="offer(' + days[i][i2].id + ')" />';
+                    } else {
+                        html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="text" value=""/>';
+                        html += '<input class="button" type="button" value="T" onClick="take(' + days[i][i2].id + ')" />';
+                    }
                 }
 
                 html += '</div>';
@@ -177,6 +183,29 @@ function displaySlots(from, to) {
         
     });
 }
+function offer(id) {
+    $('#slot_' + id).html('<img src="static/ajax-loader.gif" />');
+    $.getJSON('offer?massage_id=' + id, function(data) { 
+        alert('Send this link to mailing list. Fist visitor of this link gets this massage. \n localhost:5000/take_form?massage_id=' + id);
+        displaySlots(from, to); 
+    });
+}
+
+function take(id) {
+    username = $('#name_' + id).val();
+    if (username == '') {
+        alert('You didn\'t eneter valid username');
+    } else {
+        $('#slot_' + id).html('<img src="static/ajax-loader.gif" />');
+        $.getJSON('take?massage_id=' + id + '&user_name=' + username, function(data) { 
+            if (data.status == "error") {
+                alert("Sorry somebody was quicker than you");
+            }
+            displaySlots(from, to);
+        });
+    }
+}
+
 function next() {
     from += 7*24*60*60;
     to += 7*24*60*60;
