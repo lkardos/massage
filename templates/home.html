@@ -1,1 +1,258 @@
-home html page
+<html>
+<head>
+<title>Massage reservation system</title>
+<style>
+.day {
+    width: 19%;
+    float: left;
+    border-style: solid;
+    border-left-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-right-width: 0px;
+    border-color: #98bf21;
+}
+#friday {
+    border-right-width: 1px;
+}
+.header {
+    font-size:1.1em;
+    text-align:left;
+    padding: 5px;
+    padding-bottom:4px;
+    background-color:#A7C942;
+    color:#ffffff;
+}
+.hours {
+    position: relative;
+    height: 90%;
+}
+.slot {
+    display: none;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #98bf21;
+    background-color:#D9E1A2;
+    width: 80%; 
+    margin-left: 8%;
+    position: absolute;
+}
+.hour {
+    width: 100%;
+}
+.hour_alt {
+    width: 100%;
+    background-color:#EAF2D3;
+}
+.hour_inner {
+    border-top:1px solid #98bf21;
+}
+.timeline {
+    position: relative;
+    top: -1em;
+    left: -3.1em;
+}
+.text_input {
+    width: 50%;
+}
+.button {
+    background-color:#A7C942;
+    color:#ffffff;
+}
+.time {
+    font-size: 0.7em;
+}
+#week {
+    text-align: center;
+    padding: 1%;
+    font-size: 1.5em;
+}
+#wrapper {
+    margin: 0 0 0 5%;
+    height: 90%;
+}
+#next {
+    float: right;
+}
+#previous {
+    float: left;
+}
+</style>
+<script type="text/javascript"src="static/jquery-2.1.1.min.js"></script> 
+<script>
+var startOfDay = 10;
+var endOfDay = 15;
+var from = 0;
+var to = 0;
+function displayHours(from, to, timeline) {
+    for (var i = from; i < to; i++) {
+        document.write('<div style="height: 20%" class="');
+        if (i % 2) {
+            document.write('hour');
+        } else {
+            document.write('hour_alt');
+        }
+        document.write('"><div class="hour_inner">');
+        if (timeline) {
+            document.write('<div class="timeline">' + i + ':00</div>');
+        }
+        document.write('</div></div>');
+    }
+}
+
+function getCurWeek() {
+    var day = new Date();
+    var today = new Date();
+    today.setUTCFullYear(day.getFullYear());
+    today.setUTCMonth(day.getMonth());
+    today.setUTCDate(day.getDate());
+    today.setUTCHours(0);
+    today.setUTCMinutes(0);
+    today.setUTCSeconds(0);
+    today.setUTCMilliseconds(0);
+    var startOfWeek = (today.getTime() - (24 * 3600 * 1000 * (today.getDay() - 1))) / 1000; 
+    var endOfWeek = startOfWeek + 5*24*60*60 - 1;
+    return [startOfWeek, endOfWeek];
+}
+
+function falign(x) {
+    x += '';
+    if (x.length < 2) {
+        x = '0' + x;
+    }
+    return x;
+}
+
+function displaySlots(from, to) {
+    $('.slot').remove();
+    $('#week').text((new Date(1000*from)).toUTCString().substr(0, 16) + ' - ' + (new Date(1000*to)).toUTCString().substr(0, 16));
+    $.getJSON('get_data_timestamp?start=' + from + '&end=' + to, function(data) { 
+        data = data.massages;
+        days = new Array(5);
+        for (var i = 0; i < days.length; i++) {
+            days[i] = new Array();
+        }
+
+        
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].start < from + 24*60*60) {
+                days[0].push(data[i]);
+            } else if (data[i].start < from + 2*24*60*60) {
+                days[1].push(data[i]);
+            } else if (data[i].start < from + 3*24*60*60) {
+                days[2].push(data[i]);
+            } else if (data[i].start < from + 4*24*60*60) {
+                days[3].push(data[i]);
+            } else if (data[i].start < from + 5*24*60*60) {
+                days[4].push(data[i]);
+            }
+        }
+
+        for (var i = 0; i < days.length; i++) {
+            for (var i2 = 0; i2 < days[i].length; i2++) {
+                var start = from + 60*60*startOfDay + 24*60*60*i;
+                var end = start + (endOfDay - startOfDay)*60*60;
+                var shift = days[i][i2].start - start;
+                var pos = Math.round(100*shift/(end - start));
+                var len = Math.round(100*(days[i][i2].end - days[i][i2].start)/(end - start));
+                var html ='<div style="top:' + pos + '%; left:0px; height: ' + len +'%" class="slot" id=slot_' + days[i][i2].id + '>'
+                var df = new Date(1000*days[i][i2].start);
+                var dt = new Date(1000*days[i][i2].end);
+                html += '<span class="time">';
+                html += falign(df.getUTCHours()) + ":" + falign(df.getUTCMinutes()) + " - ";
+                html += falign(dt.getUTCHours()) + ":" + falign(dt.getUTCMinutes()) + "<br />";
+                html += '</span>';
+                if (days[i][i2].name == '') {
+                    html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="text" value=""/>';
+                    html += '<input id="reserve" class="button" type="button" value="R" onClick="reserve(' + days[i][i2].id + ');"/>';
+                } else {
+                    html += days[i][i2].name;
+                }
+
+                html += '</div>';
+                $('#hours_' + i).append(html);
+            }
+        }
+        $('.slot').fadeIn();
+        
+    });
+}
+function next() {
+    from += 7*24*60*60;
+    to += 7*24*60*60;
+    displaySlots(from, to); 
+}
+
+function previous() {
+    from -= 7*24*60*60;
+    to -= 7*24*60*60;
+    displaySlots(from, to); 
+}
+
+function reserve(id) {
+    username = $('#name_' + id).val();
+    if (username == '') {
+        alert('You didn\'t eneter valid username');
+    } else {
+        $('#slot_' + id).html('<img src="static/ajax-loader.gif" />');
+        $.getJSON('set_data?massage_id=' + id + '&user_name=' + username, function(data) { 
+            displaySlots(from, to);
+        });
+    }
+}
+
+$(function() {
+    $('#next').click(next);
+    $('#previous').click(previous);
+    var startend = getCurWeek();
+    from = startend[0];
+    to = startend[1];
+    displaySlots(from, to);
+});
+</script>
+</head>
+<body>
+    <div><input id="next" class="button" type="button" value="next>>"/></div>
+    <div><input id="previous" class="button" type="button" value="<<previous"/></div>
+    <div></div>
+    <div id="week"></div>
+    <div id="wrapper">
+
+        <div class="day" id="monday">
+            <div class="header">Monday</div>
+            <div class="hours" id="hours_0">
+                <script>displayHours(startOfDay, endOfDay, 1)</script>
+            </div>
+        </div>
+
+        <div class="day" id="tuesday">
+            <div class="header">Tuesday</div>
+            <div class="hours" id="hours_1">
+                <script>displayHours(startOfDay, endOfDay, 0)</script>
+            </div>
+        </div>
+
+        <div class="day" id="wednesday">
+            <div class="header">Wednesday</div>
+            <div class="hours" id="hours_2">
+                <script>displayHours(startOfDay, endOfDay, 0)</script>
+            </div>
+        </div>
+
+        <div class="day" id="tuesday">
+            <div class="header">Thursday</div>
+            <div class="hours" id="hours_3">
+                <script>displayHours(startOfDay, endOfDay, 0)</script>
+            </div>
+        </div>
+
+        <div class="day" id="friday">
+            <div class="header">Friday</div>
+            <div class="hours" id="hours_4">
+                <script>displayHours(startOfDay, endOfDay, 0)</script>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

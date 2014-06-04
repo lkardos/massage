@@ -29,6 +29,21 @@ def get_data():
     
     return jsonify(massages=massages, status="ok")
 
+@app.route("/get_data_timestamp")
+def get_data_timestamp():
+    start = float(request.args.get("start", None))
+    end = float(request.args.get("end", None))
+
+    try:
+        massages = map(lambda x: x.serialize_timestamp, Massage.query.filter(
+                    Massage.start >= datetime.datetime.utcfromtimestamp(start),
+                    Massage.end <= datetime.datetime.utcfromtimestamp(end)))
+    except (ValueError, AttributeError) as e:
+        return jsonify(status = "error")
+    
+    
+    return jsonify(massages=massages, status="ok")
+
 
 @app.route("/set_data")
 def set_data():
