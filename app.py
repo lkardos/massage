@@ -111,6 +111,14 @@ def set_data():
         return jsonify(status="error")
     return jsonify(status="ok")
         
+@app.route("/get_user")
+def get_user():
+    try:
+        username = request.environ.get('REMOTE_USER')
+    except (KeyError) as e:
+        return jsonify(status = "error")
+
+    return jsonify(username=request.environ.get('REMOTE_USER'), status="ok") #jsonify(username=user, status="ok")
 
 
 
