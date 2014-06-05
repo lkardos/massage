@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>Massage reservation system</title>
+<script type="text/javascript"src="static/jquery-2.1.1.min.js"></script>
+<script type="text/javascript"src="static/jquery-ui.js"></script>
+<link rel="stylesheet" href="static/jquery-ui.css">
+<style>
+.text {
+    width: 50px;
+}
+</style>
+<script>
+$(function() {
+    $('.datepicker').datepicker();
+});
+</script>
+</head>
+<body>
+<span>{{message}}</span>
+<form method="post" action="/add_slots">
+<table>
+From: <input class="datepicker" name="date_from" type="text" /> To: <input class="datepicker" name="date_to" type="text" /><br /><br />
+Slot1: <input class="text" name="slot_from" type="text" value="10:00"/> - 
+<input class="text"name="slot_to"type="text" value="10:30"/><br />
+Slot2: <input class="text"name="slot_from" type="text" value="10:40"/> - 
+<input class="text"name="slot_to"type="text" value="11:10"/><br />
+Slot3: <input class="text"name="slot_from" type="text" value="11:20"/> - 
+<input class="text"name="slot_to"type="text" value="11:50"/><br />
+Slot4: <input class="text"name="slot_from" type="text" value="12:00"/> - 
+<input class="text"name="slot_to"type="text" value="12:30"/><br />
+Slot5: <input class="text"name="slot_from" type="text" value="13:00"/> - 
+<input class="text"name="slot_to"type="text" value="13:30"/><br />
+Slot6: <input class="text"name="slot_from" type="text" value="13:40"/> - 
+<input class="text"name="slot_to"type="text" value="14:10"/><br />
+Slot7: <input class="text"name="slot_from" type="text" value="14:20"/> - 
+<input class="text"name="slot_to"type="text" value="14:50"/><br /><br />
+<input type="submit" value="confirm" />
+</form>
+</body>
+</html>

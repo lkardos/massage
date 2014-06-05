@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 import datetime, dateutil.parser
 
@@ -97,6 +97,43 @@ def take():
     except (TypeError, AttributeError) as e:
         return jsonify(status="error")
     return jsonify(status="ok")
+
+@app.route("/add_slots", methods=['GET', 'POST'])
+def add_slots():
+    if request.method == 'GET':
+        message = request.args.get("message", "", type=str)
+        return render_template("add_slots.html", message=message)
+    else:
+        date_from = request.form["date_from"]
+        date_to = request.form["date_to"]
+
+        date_from = dateutil.parser.parse(date_from).date()
+        date_to = dateutil.parser.parse(date_to).date()
+
+
+        slots_from = request.form.getlist("slot_from")
+        slots_to = request.form.getlist("slot_to")
+
+        delta = datetime.timedelta(1)
+
+        while date_from <= date_to:
+            for slot_from, slot_to in zip(slots_from, slots_to):
+                f = dateutil.parser.parse(slot_from).time()
+                t = dateutil.parser.parse(slot_to).time()
+                wf = datetime.datetime.combine(date_from, f)
+                wt = datetime.datetime.combine(date_from, t)
+
+                m = Massage()
+                m.start = wf
+                m.end = wt
+                m.name = ''
+                db.session.add(m)
+                db.session.commit()
+
+                
+            date_from += delta
+
+        return redirect(url_for("add_slots", message="fooo"))
 
 @app.route("/set_data")
 def set_data():
