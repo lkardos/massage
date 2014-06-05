@@ -84,6 +84,7 @@ var startOfDay = 10;
 var endOfDay = 15;
 var from = 0;
 var to = 0;
+var user_n;
 function displayHours(from, to, timeline) {
     for (var i = from; i < to; i++) {
         document.write('<div style="height: 20%" class="');
@@ -124,63 +125,66 @@ function falign(x) {
 }
 
 function displaySlots(from, to) {
-    $('.slot').remove();
-    $('#week').text((new Date(1000*from)).toUTCString().substr(0, 16) + ' - ' + (new Date(1000*to)).toUTCString().substr(0, 16));
-    $.getJSON('get_data_timestamp?start=' + from + '&end=' + to, function(data) { 
-        data = data.massages;
-        days = new Array(5);
-        for (var i = 0; i < days.length; i++) {
-            days[i] = new Array();
-        }
-
-        
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].start < from + 24*60*60) {
-                days[0].push(data[i]);
-            } else if (data[i].start < from + 2*24*60*60) {
-                days[1].push(data[i]);
-            } else if (data[i].start < from + 3*24*60*60) {
-                days[2].push(data[i]);
-            } else if (data[i].start < from + 4*24*60*60) {
-                days[3].push(data[i]);
-            } else if (data[i].start < from + 5*24*60*60) {
-                days[4].push(data[i]);
+    $.getJSON('get_user', function(data) { 
+        user_n = data.username;
+        $('.slot').remove();
+        $('#week').text((new Date(1000*from)).toUTCString().substr(0, 16) + ' - ' + (new Date(1000*to)).toUTCString().substr(0, 16));
+        $.getJSON('get_data_timestamp?start=' + from + '&end=' + to, function(data) { 
+            data = data.massages;
+            days = new Array(5);
+            for (var i = 0; i < days.length; i++) {
+                days[i] = new Array();
             }
-        }
 
-        for (var i = 0; i < days.length; i++) {
-            for (var i2 = 0; i2 < days[i].length; i2++) {
-                var start = from + 60*60*startOfDay + 24*60*60*i;
-                var end = start + (endOfDay - startOfDay)*60*60;
-                var shift = days[i][i2].start - start;
-                var pos = Math.round(100*shift/(end - start));
-                var len = Math.round(100*(days[i][i2].end - days[i][i2].start)/(end - start));
-                var html ='<div style="top:' + pos + '%; left:0px; height: ' + len +'%" class="slot" id=slot_' + days[i][i2].id + '>'
-                var df = new Date(1000*days[i][i2].start);
-                var dt = new Date(1000*days[i][i2].end);
-                html += '<span class="time">';
-                html += falign(df.getUTCHours()) + ":" + falign(df.getUTCMinutes()) + " - ";
-                html += falign(dt.getUTCHours()) + ":" + falign(dt.getUTCMinutes()) + "<br />";
-                html += '</span>';
-                if (days[i][i2].name == '') {
-                    html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="text" value=""/>';
-                    html += '<input id="reserve" class="button" type="button" value="R" onClick="reserve(' + days[i][i2].id + ');"/>';
-                } else {
-                    html += days[i][i2].name;
-                    if (!days[i][i2].offered) {
-                        html += '<input class="button" type="button" value="O" onClick="offer(' + days[i][i2].id + ')" />';
-                    } else {
-                        html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="text" value=""/>';
-                        html += '<input class="button" type="button" value="T" onClick="take(' + days[i][i2].id + ')" />';
-                    }
+            
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].start < from + 24*60*60) {
+                    days[0].push(data[i]);
+                } else if (data[i].start < from + 2*24*60*60) {
+                    days[1].push(data[i]);
+                } else if (data[i].start < from + 3*24*60*60) {
+                    days[2].push(data[i]);
+                } else if (data[i].start < from + 4*24*60*60) {
+                    days[3].push(data[i]);
+                } else if (data[i].start < from + 5*24*60*60) {
+                    days[4].push(data[i]);
                 }
-
-                html += '</div>';
-                $('#hours_' + i).append(html);
             }
-        }
-        $('.slot').fadeIn();
-        
+
+            for (var i = 0; i < days.length; i++) {
+                for (var i2 = 0; i2 < days[i].length; i2++) {
+                    var start = from + 60*60*startOfDay + 24*60*60*i;
+                    var end = start + (endOfDay - startOfDay)*60*60;
+                    var shift = days[i][i2].start - start;
+                    var pos = Math.round(100*shift/(end - start));
+                    var len = Math.round(100*(days[i][i2].end - days[i][i2].start)/(end - start));
+                    var html ='<div style="top:' + pos + '%; left:0px; height: ' + len +'%" class="slot" id=slot_' + days[i][i2].id + '>'
+                    var df = new Date(1000*days[i][i2].start);
+                    var dt = new Date(1000*days[i][i2].end);
+                    html += '<span class="time">';
+                    html += falign(df.getUTCHours()) + ":" + falign(df.getUTCMinutes()) + " - ";
+                    html += falign(dt.getUTCHours()) + ":" + falign(dt.getUTCMinutes()) + "<br />";
+                    html += '</span>';
+                    if (days[i][i2].name == '') {
+                        html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="hidden" value="' + user_n + '"/>';
+                        html += '<input id="reserve" class="button" type="button" value="R" onClick="reserve(' + days[i][i2].id + ');"/>';
+                    } else {
+                        html += days[i][i2].name;
+                        if (!days[i][i2].offered) {
+                            html += '<input class="button" type="button" value="O" onClick="offer(' + days[i][i2].id + ')" />';
+                        } else {
+                            html += '<input id="name_' + days[i][i2].id + '" class="text_input" type="hidden" value="' + user_n + '"/>';
+                            html += '<input class="button" type="button" value="T" onClick="take(' + days[i][i2].id + ')" />';
+                        }
+                    }
+
+                    html += '</div>';
+                    $('#hours_' + i).append(html);
+                }
+            }
+            $('.slot').fadeIn();
+            
+        });
     });
 }
 function offer(id) {
@@ -229,6 +233,7 @@ function reserve(id) {
         });
     }
 }
+
 
 $(function() {
     $('#next').click(next);
