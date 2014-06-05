@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, request, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 import datetime, dateutil.parser
+import local_config
 
 app = Flask(__name__)
 app.debug = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = local_config.database #'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
 
 from models import *
