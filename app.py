@@ -72,7 +72,7 @@ def take_form():
 @app.route("/take_form_submit")
 def take_form_submit():
     massage_id = request.args.get("massage_id", None, type=int)
-    user_name = request.args.get("user_name", None, type=str)
+    user_name = get_user() #request.args.get("user_name", None, type=str)
     
     massage = Massage.query.get(massage_id)
     if massage.name == '' or not massage.offered:
@@ -85,7 +85,7 @@ def take_form_submit():
 @app.route("/take")
 def take():
     massage_id = request.args.get("massage_id", None, type=int)
-    user_name = request.args.get("user_name", None, type=str)
+    user_name = get_user()
     
     try:
         massage = Massage.query.get(massage_id)
@@ -150,14 +150,19 @@ def set_data():
     return jsonify(status="ok")
         
 @app.route("/get_user")
+def get_user_json():
+    remote_user = get_user() #request.environ.get('REMOTE_USER')
+    if not remote_user:
+        return jsonify(status = "error")
+    return jsonify(user=remote_user, status="ok") 
+
 def get_user():
     try:
         remote_user = request.environ.get('REMOTE_USER')
     except (KeyError) as e:
-        return jsonify(status = "error")
+        return None
     remote_user = remote_user.split("@")[0]
-
-    return jsonify(user=remote_user, status="ok") 
+    return remote_user
 
 
 if __name__ == "__main__":
