@@ -74,6 +74,10 @@
 #next {
     float: right;
 }
+#user_id {
+    padding: 3px;
+    float: right;
+}
 #previous {
     float: left;
 }
@@ -127,6 +131,7 @@ function falign(x) {
 function displaySlots(from, to) {
     $.getJSON('get_user', function(data) { 
         user_n = data.username;
+        $('#user_id').text(user_n);
         $('.slot').remove();
         $('#week').text((new Date(1000*from)).toUTCString().substr(0, 16) + ' - ' + (new Date(1000*to)).toUTCString().substr(0, 16));
         $.getJSON('get_data_timestamp?start=' + from + '&end=' + to, function(data) { 
@@ -247,6 +252,7 @@ $(function() {
 </head>
 <body>
     <div><input id="next" class="button" type="button" value="next>>"/></div>
+    <div id="user_id"></div>
     <div><input id="previous" class="button" type="button" value="<<previous"/></div>
     <div></div>
     <div id="week"></div>
