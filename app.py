@@ -134,7 +134,7 @@ def add_slots():
                 
             date_from += delta
 
-        return redirect(url_for("add_slots", message="fooo"))
+        return redirect(url_for("add_slots", message="Successfully added."))
 
 @app.route("/set_data")
 def set_data():
